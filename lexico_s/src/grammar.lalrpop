@@ -1,0 +1,27 @@
+// src/grammar.lalrpop
+use std::str::FromStr;
+use crate::ast::{Expr, Opcode};
+
+grammar;
+
+// El macro `pub` indica que esta es la regla principal (punto de entrada)
+pub Expr: Box<Expr> = {
+    <l:Expr> "+" <r:Factor> => Box::new(Expr::Op(l, Opcode::Add, r)),
+    <l:Expr> "-" <r:Factor> => Box::new(Expr::Op(l, Opcode::Sub, r)),
+    Factor,
+};
+
+// Separamos los factores para manejar la precedencia de operadores (PEMDAS)
+Factor: Box<Expr> = {
+    <l:Factor> "*" <r:Term> => Box::new(Expr::Op(l, Opcode::Mul, r)),
+    <l:Factor> "/" <r:Term> => Box::new(Expr::Op(l, Opcode::Div, r)),
+    Term,
+};
+
+Term: Box<Expr> = {
+    <n:Num> => Box::new(Expr::Number(n)),
+    "(" <e:Expr> ")" => e,
+};
+
+// LALRPOP usa expresiones regulares para los tokens terminales
+Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
