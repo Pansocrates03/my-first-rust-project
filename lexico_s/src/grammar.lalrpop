@@ -1,10 +1,78 @@
 // src/grammar.lalrpop
 use std::str::FromStr;
-use crate::ast::{Expr, Opcode};
 
 grammar;
 
+// PROGRAMA
+
+pub Programa: () = {
+    "programa" "id" PVARS PFUNCS "inicio" CUERPO "fin" => ()
+};
+
+PVARS: () = {
+    VARS => (),  // tiene variables
+    => (),       // sin variables
+};
+
+PFUNCS: () = {
+    //FUNCS PFUNCS => (),  // una o más funciones
+                 => (),  // epsilon
+};
+
+// VARS
+
+VARS: () = {
+    "vars" VDECL => (),
+};
+
+VDECL: () = {
+    IDLIST ":" TIPO ";" VDECL => (),  // declaración + más declaraciones
+    IDLIST ":" TIPO ";"        => (),  // última declaración
+};
+
+IDLIST: () = {
+    "id" "," IDLIST => (),  // id seguido de más ids
+    "id"            => (),  // último id
+};
+
+// TIPO
+
+TIPO: () = {
+    "entero" => (),
+    "flotante" => (),
+};
+
+// CUERPO
+
+CUERPO: () = {
+    "{" CE "}" => (),
+    => (),  // epsilon
+};
+
+CE: () = {
+    ESTATUTO CE => (),   // uno o más estatutos
+                => (),   // epsilon
+};
+
+// ESTATUTO
+
+ESTATUTO: () = {
+    //ASIGNA => (),
+    //CONDICION => (),
+    //CICLO => (),
+    //LLAMADA => (),
+    //IMPRIME => (),
+    "[" EE "]" => (),  // bloque de código
+};
+
+EE: () = {
+    ESTATUTO EE => (),   // uno o más estatutos
+                => (),   // epsilon
+};
+
+
 // El macro `pub` indica que esta es la regla principal (punto de entrada)
+/*
 pub Expr: Box<Expr> = {
     <l:Expr> "+" <r:Factor> => Box::new(Expr::Op(l, Opcode::Add, r)),
     <l:Expr> "-" <r:Factor> => Box::new(Expr::Op(l, Opcode::Sub, r)),
@@ -22,6 +90,7 @@ Term: Box<Expr> = {
     <n:Num> => Box::new(Expr::Number(n)),
     "(" <e:Expr> ")" => e,
 };
+*/
 
 // LALRPOP usa expresiones regulares para los tokens terminales
 Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();

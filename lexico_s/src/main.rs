@@ -7,9 +7,9 @@ lalrpop_util::lalrpop_mod!(pub grammar);
 
 fn main() {
     // LALRPOP expone un parser con el nombre de tu regla principal + "Parser"
-    let parser = grammar::ExprParser::new();
+    let parser = grammar::ProgramaParser::new();
 
-    let codigo_fuente = "2 + 3 * 4";
+    let codigo_fuente = "programa id vars id, id : entero; id : flotante; inicio { [ ] [ [ ] ] } fin";
     
     match parser.parse(codigo_fuente) {
         Ok(ast) => {

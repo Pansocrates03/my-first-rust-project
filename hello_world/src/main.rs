@@ -1,10 +1,11 @@
-use std::io;
 mod queue;
-use queue::Queue;
 mod stack;
+
+use std::io;
+use std::collections::HashMap;
+use queue::Queue;
 use stack::Stack;
 
-use std::collections::HashMap;
 
 
 
