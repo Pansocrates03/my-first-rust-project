@@ -1,12 +1,20 @@
 // src/grammar.lalrpop
 use std::str::FromStr;
+use crate::ast::{Expr, Opcode};
 
 grammar;
+
+Identifier: String = {
+    <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => s.to_string(),
+}
+
+Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
+Float: f64 = <s:r"[0-9]+\\.[0-9]+"> => f64::from_str(s).unwrap();
 
 // PROGRAMA
 
 pub Programa: () = {
-    "programa" "id" PVARS PFUNCS "inicio" CUERPO "fin" => ()
+    "programa" Identifier PVARS PFUNCS "inicio" CUERPO "fin" => ()
 };
 
 PVARS: () = {
@@ -31,8 +39,8 @@ VDECL: () = {
 };
 
 IDLIST: () = {
-    "id" "," IDLIST => (),  // id seguido de más ids
-    "id"            => (),  // último id
+    Identifier "," IDLIST => (),  // id seguido de más ids
+    Identifier            => (),  // último id
 };
 
 // TIPO
@@ -57,11 +65,11 @@ CE: () = {
 // ESTATUTO
 
 ESTATUTO: () = {
-    //ASIGNA => (),
-    //CONDICION => (),
-    //CICLO => (),
+    ASIGNA => (),
+    CONDICION => (),
+    CICLO => (),
     //LLAMADA => (),
-    //IMPRIME => (),
+    IMPRIME => (),
     "[" EE "]" => (),  // bloque de código
 };
 
@@ -70,6 +78,96 @@ EE: () = {
                 => (),   // epsilon
 };
 
+// IMPRIME
+
+IMPRIME: () = {
+    "escribe ("  I2=> (),
+}
+
+I2: () = {
+    EXPRESION I3 => (),
+    Identifier I3 => (),
+};
+
+I3: () = {
+    "," I2 => (),
+    ")" ";" => (),
+};
+
+//ASIGNA
+
+ASIGNA: () = {
+    Identifier ":=" EXPRESION ";" => (),
+};
+
+// CICLO
+
+CICLO: () = {
+    "mientras" "(" EXPRESION ")" CUERPO => (),
+};
+
+// EXPRESION
+
+EXPRESION: () = {
+    EXP EX1 => (),
+};
+
+EX1: () = {
+    ">" EXP => (),
+    "<" EXP => (),
+    "!=" EXP => (),
+    "==" EXP => (),
+};
+
+// CONDICION
+
+CONDICION: () = {
+    "si" "(" EXPRESION ")" CUERPO C1 => (),
+};
+
+C1: () = {
+    "sino" CUERPO => (),
+    => (),  // epsilon
+};
+
+// CTE
+
+CTE: () = {
+    Num => (),
+    Float => (), // Reintroduced after fixing the conflict
+};
+
+// EXP
+
+EXP: () = {
+    TERMINO EXP2 => (),
+};
+
+EXP2: () = {
+    "+" EXP => (),
+    "-" EXP => (),
+    => (),  // epsilon
+};
+
+// TERMINO
+
+TERMINO: () = {
+    FACTOR TER2 => (),
+};
+
+TER2: () = {
+    "*" FACTOR TER2 => (),
+    "/" FACTOR TER2 => (),
+    => (),  // epsilon
+};
+
+// FACTOR
+
+FACTOR: () = {
+    Identifier => (),
+    CTE => (),
+    "(" EXPRESION ")" => (),
+};
 
 // El macro `pub` indica que esta es la regla principal (punto de entrada)
 /*
@@ -93,4 +191,3 @@ Term: Box<Expr> = {
 */
 
 // LALRPOP usa expresiones regulares para los tokens terminales
-Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
