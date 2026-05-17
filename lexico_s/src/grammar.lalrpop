@@ -165,8 +165,57 @@ TER2: () = {
 
 FACTOR: () = {
     Identifier => (),
-    CTE => (),
     "(" EXPRESION ")" => (),
+    LLAMADA => (),
+    "+" F3 => (),  // unary plus
+    "-" F3 => (),  // unary minus
+    F3 => (),     // factor sin operador unario
+};
+
+F3: () = {
+    Identifier => (),
+    CTE => (),
+};
+
+FUNCS: () = {
+    "nula" FUN2 => (),
+    TIPO FUN2 => (),
+};
+
+FUN2: () = {
+    Identifier "(" FUN3 => (),
+};
+
+FUN3: () = {
+    Identifier ":" TIPO FUN4 FUN5 => (),
+    FUN5 => (),  // función con parámetros
+};
+
+FUN4: () = {
+    "," FUN2 => (),  // más parámetros
+}
+
+FUN5: () = {
+    ")"  => (),  // fin de la declaración de la función
+};
+
+// LLAMADA
+
+LLAMADA: () = {
+    Identifier "(" L1 => (),
+};
+
+L1: () = {
+    EXPRESION L2 L3 => (),
+    L2 => (),  // llamada sin argumentos
+}
+
+L2: () = {
+    L1 => (),  // más argumentos
+}
+
+L3: () = {
+    ")" => (),  // fin de la llamada
 };
 
 // El macro `pub` indica que esta es la regla principal (punto de entrada)
